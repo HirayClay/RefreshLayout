@@ -1,3 +1,4 @@
+[中文文档](/doc/README-cn.md)
 ## RefreshLayout
 An easy pull-to-refresh and load-more widget on the basis of  NestedScroll
 
