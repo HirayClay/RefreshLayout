@@ -29,7 +29,6 @@ import android.view.animation.Interpolator
  */
 
 class RefreshLayout : ViewGroup, NestedScrollingParent {
-
     companion object {
         val IDLE = 0
         val DRAGGING = 1
