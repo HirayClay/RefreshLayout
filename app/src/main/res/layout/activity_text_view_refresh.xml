@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ptr.TextViewRefreshActivity">
+
+    <com.refresh.RefreshLayout
+        android:id="@+id/refreshlayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:targetId="@+id/wrapper">
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/textview"
+                android:layout_margin="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/large_text" />
+        </android.support.v4.widget.NestedScrollView>
+
+
+    </com.refresh.RefreshLayout>
+
+</FrameLayout>

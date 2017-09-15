@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context="com.ptr.IndexActivity">
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/index_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="15px"
+        android:text="TextView"
+        android:textAllCaps="false" />
+
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/index_linearlayoutmanager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="15px"
+        android:text="RecyclerView With LinearLayoutManager"
+        android:textAllCaps="false" />
+
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/index_gridlayoutmanager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="15px"
+        android:text="RecyclerView With GridLayoutManager"
+        android:textAllCaps="false" />
+
+
+</LinearLayout>

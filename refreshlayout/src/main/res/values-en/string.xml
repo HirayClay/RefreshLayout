@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_load_more">Release to load more</string>
+    <string name="release_refresh">Release to Refresh</string>
+
+</resources>
