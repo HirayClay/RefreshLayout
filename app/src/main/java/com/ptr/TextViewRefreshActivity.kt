@@ -13,6 +13,10 @@ class TextViewRefreshActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_text_view_refresh)
 
+
+        //替换自己的刷新头部
+
+
         refreshlayout.setRefreshListener(object : RefreshListener {
             override fun onLoadMore() {
                 alternative = !alternative
@@ -28,7 +32,7 @@ class TextViewRefreshActivity : AppCompatActivity() {
                 window.decorView.postDelayed({
                     textview.text = getString(if (alternative) R.string.lorem else R.string.large_text)
                     refreshlayout.onRefreshComplete()
-                }, 1200)
+                }, 2000)
             }
 
         })

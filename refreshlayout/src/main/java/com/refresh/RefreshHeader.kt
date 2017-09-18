@@ -13,7 +13,26 @@ import android.view.View
  * @author CJJ
  */
 
-class RefreshHeader : View {
+class RefreshHeader : View, PtrHandler {
+
+    override fun onIdle(refreshView: RefreshLayout, ptr: View) {
+        this.state = RefreshLayout.IDLE
+        invalidate()
+    }
+
+    override fun onPrepare(refreshView: RefreshLayout, ptr: View) {
+        this.state = RefreshLayout.PTR_TENSE
+        invalidate()
+    }
+
+    override fun onPreLoading(refreshView: RefreshLayout, ptr: View) {
+        this.state = RefreshLayout.PTR_LOADING
+        invalidate()
+    }
+
+    override fun onOffsetChange(ratio: Float) {
+        //todo
+    }
 
     var space: Int = 0
     var arrowIcon: Bitmap
@@ -33,7 +52,7 @@ class RefreshHeader : View {
         space = context.resources.getDimensionPixelSize(R.dimen.refreshview_space)
         arrowIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.arrow)
         loadingIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.loading)
-        RELEASE_LOADING = resources.getString(R.string.release_refresh)
+        RELEASE_LOADING = resources.getString(R.string.release_refresh_text)
         textPaint = TextPaint()
         textPaint.color = Color.BLACK
         textPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, resources.displayMetrics)

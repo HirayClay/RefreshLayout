@@ -7,6 +7,7 @@ import android.support.v4.view.NestedScrollingParentHelper
 import android.support.v4.view.ViewCompat
 import android.support.v4.widget.ScrollerCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
@@ -35,7 +36,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         //settling to certain position
         val SETTLING = 2
         //special for settling to  top = 0
-        val restoring: Boolean = false
+        var refreshing: Boolean = false
         val SETTLING_DURATION = 300 //ms
 
         //tags for ptr
@@ -58,8 +59,10 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     private val durationInterpolator = Interpolator { t -> 1 - t * t * t * t * t }
     val TAG = "RefreshLayout"
-    var mHeader: RefreshHeader
+    var mHeader: View
     var mFooter: RefreshFooter
+    var mHeaderHandler: PtrHandler
+    lateinit var mFooterHandler: PtrHandler
     var mScroller: ScrollerCompat
     var headerScroller: ScrollerCompat
     var nestedScrollingParentHelper: NestedScrollingParentHelper
@@ -73,6 +76,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.RefreshLayout)
         mHeader = RefreshHeader(context)
+        mHeaderHandler = mHeader as PtrHandler
         mFooter = RefreshFooter(context)
         resourceId = ta.getResourceId(R.styleable.RefreshLayout_targetId, -1)
         nestedScrollingParentHelper = NestedScrollingParentHelper(this)
@@ -88,7 +92,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (resourceId != -1)
             mTarget = findViewById(resourceId)
     }
-
 
     override fun dispatchDraw(canvas: Canvas?) {
         super.dispatchDraw(canvas)
@@ -111,6 +114,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
         consumed[0] = 0
         consumed[1] = preScroll(dy)
+
     }
 
     override fun onNestedScroll(target: View?, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
@@ -242,7 +246,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     }
 
     /**
-     *  ee....how do i use the velocity to compute the appropriate settling duration???
+     * ....how do i use the velocity to compute the appropriate settling duration???
      */
     private fun preFling(yVel: Float): Boolean {
         val currTop = mTarget.top
@@ -253,29 +257,31 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (currTop == 0)
             return false
 
-
+        refreshing = true
 
         if (currTop <= -mFooter.measuredHeight) {
-            mScroller.startScroll(0, currTop, 0, -mHeader.measuredHeight - currTop, (SETTLING_DURATION * durationInterpolator.getInterpolation(yVel / MAX_VEL)).toInt() / 3)
+            val duration = (SETTLING_DURATION * durationInterpolator.getInterpolation(yVel / MAX_VEL)).toInt() / 3
+            mScroller.startScroll(0, currTop, 0, -mFooter.measuredHeight - currTop, duration)
             state = SETTLING
             footerState = PTR_LOADING
             mFooter.onStateChange(footerState)
             this.listener.onLoadMore()
             ViewCompat.postInvalidateOnAnimation(this)
             return true
-        }
-        if (currTop < mHeader.measuredHeight) {
-            mScroller.startScroll(0, currTop, 0, -currTop, 100)
-            state = SETTLING
-            ViewCompat.postInvalidateOnAnimation(this)
-        } else {
+        } else if (currTop >= mHeader.measuredHeight) {
             mScroller.startScroll(0, currTop, 0, mHeader.measuredHeight - currTop, 100)
             state = SETTLING
             headerState = PTR_LOADING
-            mHeader.onStateChange(headerState)
+            mHeaderHandler.onPreLoading(this, mHeader)
+//            mHeader.onStateChange(headerState)
             this.listener.onRefresh()
             ViewCompat.postInvalidateOnAnimation(this)
             return true
+        } else {
+            mScroller.startScroll(0, currTop, 0, -currTop, 100)
+            state = SETTLING
+            ViewCompat.postInvalidateOnAnimation(this)
+            refreshing = false
         }
 
         //让内部View滚动
@@ -288,16 +294,21 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     private fun refresh() {
         if (mHeader.top <= 0) {
             headerState = PTR_IDLE
+            mHeaderHandler.onIdle(this, mHeader)
         } else {
             headerState = PTR_TENSE
+            mHeaderHandler.onPrepare(this, mHeader)
+
         }
+
+        mHeaderHandler.onOffsetChange(zeroConstrain(mHeader.bottom.toFloat() / mHeader.height))
 
         if (mFooter.bottom <= measuredHeight) {
             footerState = PTR_TENSE
         } else {
             footerState = PTR_IDLE
         }
-        mHeader.onStateChange(headerState)
+//        mHeader.onStateChange(headerState)
         mFooter.onStateChange(footerState)
     }
 
@@ -316,20 +327,26 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (curTop == 0 || state == SETTLING)
             return
 
+        refreshing = true
+
         if (headerState == PTR_TENSE) {
             destTop = mHeader.measuredHeight
             headerState = PTR_LOADING
-            mHeader.onStateChange(headerState)
-            this.listener.onRefresh()
-        } else if (headerState == PTR_IDLE) {
-            destTop = 0
-        }
+            mHeaderHandler.onPreLoading(this, mHeader)
 
-        if (footerState == PTR_TENSE) {
+//            mHeader.onStateChange(headerState)
+            this.listener.onRefresh()
+        } else if (footerState == PTR_TENSE) {
             destTop = -mFooter.measuredHeight
             footerState = PTR_LOADING
             mFooter.onStateChange(footerState)
             this.listener.onLoadMore()
+        } else {
+            headerState = PTR_IDLE
+            footerState = PTR_IDLE
+            mHeaderHandler.onIdle(this, mHeader)
+            destTop = 0
+            refreshing = false
         }
 
         state = SETTLING
@@ -347,26 +364,26 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         return ((distance + 0f) / BASE_PULL_DOWN_HEIGHT * SETTLING_DURATION).toInt()
     }
 
+    //无法知道此时header 和footer的状态
     override fun computeScroll() {
 
         if (mScroller.computeScrollOffset()) {
             val curY = mScroller.currY
             val scrollY = curY - mTarget.top
-            var headerTop = headerPos(mTarget.top + scrollY)
-            var footerTop = footerPos(mTarget.top + scrollY)
+            val headerTop = headerPos(mTarget.top + scrollY)
+            val footerTop = footerPos(mTarget.top + scrollY)
             mHeader.offsetTopAndBottom(headerTop - mHeader.top)
             mFooter.offsetTopAndBottom(footerTop - mFooter.top)
             mTarget.offsetTopAndBottom(scrollY)
+//            mHeaderHandler.onOffsetChange()
+
             ViewCompat.postInvalidateOnAnimation(this)
-        } else {
-
         }
-
 
     }
 
     /**
-     * scroll with resistence ,use piece-wise function
+     * scroll with resistance ,use piece-wise function
      * 用的分段函数,让下拉越来越困难,模拟阻尼效果
      * 0<curTop<250 f(x) = -x/1250+1
      * curTop>250 f(x) = 200/x
@@ -423,16 +440,39 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         this.listener = listener
     }
 
+
+    fun setHeader(header: View) {
+        removeView(mHeader)
+        this.mHeader = header
+        if (header is PtrHandler)
+            this.mHeaderHandler = header
+        else {
+            throw IllegalStateException("custom header must implement PtrHandler interface!")
+        }
+        addView(mHeader)
+        invalidate()
+        requestLayout()
+    }
+
     fun onRefreshComplete() {
 
         //如果在停止刷新时候用户正在滑动，则取消此次settle
         if (state != DRAGGING) {
+            Log.i(TAG, "Settling==================")
             state = IDLE
             headerState = PTR_IDLE
             footerState = PTR_IDLE
-            mHeader.onStateChange(headerState)
+            mHeaderHandler.onIdle(this, mHeader)
+//            mHeader.onStateChange(headerState)
             mFooter.onStateChange(footerState)
             settle()
         }
+    }
+
+    private fun zeroConstrain(value: Float): Float {
+        if (value <= 0f)
+            return 0f
+        else return value
+
     }
 }
