@@ -8,7 +8,6 @@ import android.support.v4.view.ViewCompat
 import android.support.v4.widget.ScrollerCompat
 import android.util.AttributeSet
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
@@ -37,9 +36,11 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         //settling to certain position
         val SETTLING = 2
         val REFRESHING_OR_LOADING = 3
+        //force settle to top
+        val FORCE = 4
         //special for settling to  top = 0
         var refreshing: Boolean = false
-        val SETTLING_DURATION = 300 //ms
+        val SETTLING_DURATION = 1300 //ms
 
         //tags for ptr
         val PTR_IDLE = 0
@@ -169,8 +170,8 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
     private fun preScroll(dy: Int): Int {
-        Log.i(TAG, "dy::::::::::::::::::$dy ")
-        if (state == SETTLING)
+        Log.i(TAG, "dy::::::::::::::::::$dy $state")
+        if (state == SETTLING || state == FORCE)
             return dy
         state = DRAGGING
         var consumedY = 0
@@ -327,7 +328,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         var destTop = 0
 
         //already in "settling" state or start a new nest scroll ,cancel this settle
-        if (curTop == 0 || state == SETTLING)
+        if (curTop == 0 || state == SETTLING || state == FORCE)
             return
 
         refreshing = true
@@ -354,6 +355,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
         state = SETTLING
 
+        Log.i(TAG, "SSSSSSSSSSSSSSSS")
         val deltaY = destTop - curTop
         val duration = linearDuration(Math.abs(deltaY))
         mScroller.startScroll(0, curTop, 0, deltaY, duration)
@@ -383,12 +385,14 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             if (state == SETTLING) {
                 if (mScroller.finalY == mHeader.height || mScroller.finalY == -mFooter.height)
                     state = REFRESHING_OR_LOADING
-                else if (mScroller.finalY == 0)
-                {
+                else if (mScroller.finalY == 0) {
                     Log.i(TAG, "DDDDDDDDDDDDDDDDDDD")
                     state = IDLE
                 }
             }
+
+            if (state == FORCE)
+                state = IDLE
         }
 
     }
@@ -462,18 +466,16 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     }
 
     fun onRefreshComplete() {
+//        settle()
+        forceSettleToTop()
+    }
 
-        //如果在停止刷新时候用户正在滑动，则取消此次settle
-//        if (state != DRAGGING) {
-//            Log.i(TAG, "Settling==================")
-//            state = IDLE
-//            headerState = PTR_IDLE
-//            footerState = PTR_IDLE
-//            mHeaderHandler.onIdle(this, mHeader)
-////            mHeader.onStateChange(headerState)
-//            mFooter.onStateChange(footerState)
-        settle()
-//        }
+    private fun forceSettleToTop() {
+        state = FORCE
+        val curTop = mHeader.top
+        val deltaY = -curTop
+        mScroller.startScroll(0, curTop, 0, deltaY, linearDuration(curTop))
+        ViewCompat.postInvalidateOnAnimation(this)
     }
 
     private fun zeroConstrain(value: Float): Float {
