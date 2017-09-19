@@ -14,6 +14,9 @@ import android.view.View
  */
 
 class RefreshHeader : View, PtrHandler {
+    override fun getView(): View {
+        return this
+    }
 
     override fun onIdle(refreshView: RefreshLayout, ptr: View) {
         this.state = RefreshLayout.IDLE
@@ -25,7 +28,7 @@ class RefreshHeader : View, PtrHandler {
         invalidate()
     }
 
-    override fun onPreLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
         this.state = RefreshLayout.PTR_LOADING
         invalidate()
     }
@@ -39,6 +42,7 @@ class RefreshHeader : View, PtrHandler {
     var loadingIcon: Bitmap
     var textPaint: TextPaint
     val DEGREE = 10f
+    val IDLE_TEXT:String
     val RELEASE_LOADING: String
     var angle = 0f
     val THRESHOLD = 0.8f
@@ -46,18 +50,21 @@ class RefreshHeader : View, PtrHandler {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    private var textWidth: Float
+    private var tenseTextWidth: Float
+    private var idleTextWidth:Float
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         space = context.resources.getDimensionPixelSize(R.dimen.refreshview_space)
         arrowIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.arrow)
         loadingIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.loading)
         RELEASE_LOADING = resources.getString(R.string.release_refresh_text)
+        IDLE_TEXT=context.resources.getString(R.string.refresh_footer_idle_text)
         textPaint = TextPaint()
         textPaint.color = Color.BLACK
         textPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, resources.displayMetrics)
         textPaint.textAlign = Paint.Align.LEFT
-        textWidth = textPaint.measureText(RELEASE_LOADING)
+        tenseTextWidth = textPaint.measureText(RELEASE_LOADING)
+        idleTextWidth = textPaint.measureText(IDLE_TEXT)
     }
 
 
@@ -72,13 +79,15 @@ class RefreshHeader : View, PtrHandler {
             val left = measuredWidth / 2f - arrowIcon.width / 2
             val top = measuredHeight / 2f - 5 - arrowIcon.height / 2
             canvas.drawBitmap(arrowIcon, left, top, null)
+            val x = measuredWidth / 2 - idleTextWidth / 2
+            canvas.drawText(IDLE_TEXT, x, space + arrowIcon.height + 10 + -textPaint.fontMetrics.top, textPaint)
 
         } else if (state == RefreshLayout.PTR_TENSE) {
             // when tense,draw arrow bitmap and the text
             val left = measuredWidth / 2f - arrowIcon.width / 2
             val top = measuredHeight / 2f - 10 - arrowIcon.height / 2
             canvas.drawBitmap(arrowIcon, left, top, null)
-            var x = measuredWidth / 2 - textWidth / 2
+            var x = measuredWidth / 2 - tenseTextWidth / 2
             canvas.drawText(RELEASE_LOADING, x, space + arrowIcon.height + 10 + -textPaint.fontMetrics.top, textPaint)
 
         } else {//loading

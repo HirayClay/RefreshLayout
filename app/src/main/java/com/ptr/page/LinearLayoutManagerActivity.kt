@@ -1,4 +1,4 @@
-package com.ptr
+package com.ptr.page
 
 import android.graphics.Rect
 import android.os.Bundle
@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
+import com.ptr.ItemsAdapter
+import com.ptr.R
 import com.refresh.RefreshListener
 import kotlinx.android.synthetic.main.activity_linearlayoutmanager.*
 
@@ -36,22 +38,22 @@ class LinearLayoutManagerActivity : AppCompatActivity() {
 
         })
         recyclerView.adapter = itemsAdapter
-
-        refreshlayout.setRefreshListener(object : RefreshListener {
-            override fun onLoadMore() {
-                window.decorView.postDelayed({
-                    itemsAdapter.addFooter(R.mipmap.load_more, "CryPretty")
-                    refreshlayout.onRefreshComplete()
-                }, 1000)
-            }
-
-            override fun onRefresh() {
-                window.decorView.postDelayed({
-                    itemsAdapter.addHeader(R.mipmap.newly_add, "Doraemon No.${index++}")
-                    refreshlayout.onRefreshComplete()
-                }, 1000)
-            }
-
-        })
+//
+//        refreshlayout.setRefreshListener(object : RefreshListener {
+//            override fun onLoadMore() {
+//                window.decorView.postDelayed({
+//                    itemsAdapter.addFooter(R.mipmap.load_more, "CryPretty")
+//                    refreshlayout.onRefreshComplete()
+//                }, 1000)
+//            }
+//
+//            override fun onRefresh() {
+//                window.decorView.postDelayed({
+//                    itemsAdapter.addHeader(R.mipmap.newly_add, "Doraemon No.${index++}")
+//                    refreshlayout.onRefreshComplete()
+//                }, 1000)
+//            }
+//
+//        })
     }
 }

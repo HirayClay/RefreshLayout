@@ -1,7 +1,8 @@
-package com.ptr
+package com.ptr.page
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.ptr.R
 import com.refresh.RefreshListener
 import kotlinx.android.synthetic.main.activity_text_view_refresh.*
 
@@ -32,7 +33,7 @@ class TextViewRefreshActivity : AppCompatActivity() {
                 window.decorView.postDelayed({
                     textview.text = getString(if (alternative) R.string.lorem else R.string.large_text)
                     refreshlayout.onRefreshComplete()
-                }, 2000)
+                }, 4000)
             }
 
         })

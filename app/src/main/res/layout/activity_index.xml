@@ -38,5 +38,13 @@
         android:text="RecyclerView With GridLayoutManager"
         android:textAllCaps="false" />
 
-
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/index_custom_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:padding="15px"
+        android:text="Replace With your Custom Header"
+        android:textAllCaps="false" />
 </LinearLayout>

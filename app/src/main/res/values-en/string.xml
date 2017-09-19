@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="replace_header1">Custom Header1</string>
+    <string name="replace_header2">Custom Header2</string>
+    <string name="default_header">default Header</string>
+</resources>

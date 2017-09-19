@@ -7,6 +7,10 @@ import android.view.View
  *@author CJJ
  */
 class PtrHandlerAdapter : PtrHandler {
+    override fun getView(): View {
+        return null!!
+    }
+
     override fun onOffsetChange(ratio: Float) {
         /*empty*/
     }
@@ -19,7 +23,7 @@ class PtrHandlerAdapter : PtrHandler {
         /*empty*/
     }
 
-    override fun onPreLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
         /*empty*/
     }
 }

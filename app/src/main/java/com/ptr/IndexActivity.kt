@@ -3,6 +3,10 @@ package com.ptr
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.ptr.page.CustomHeaderActivity
+import com.ptr.page.GridLayoutManagerActivity
+import com.ptr.page.LinearLayoutManagerActivity
+import com.ptr.page.TextViewRefreshActivity
 import kotlinx.android.synthetic.main.activity_index.*
 
 class IndexActivity : AppCompatActivity() {
@@ -22,6 +26,9 @@ class IndexActivity : AppCompatActivity() {
 
         index_gridlayoutmanager.setOnClickListener {
             startActivity(Intent(this@IndexActivity, GridLayoutManagerActivity::class.java))
+        }
+        index_custom_header.setOnClickListener {
+            startActivity(Intent(this@IndexActivity, CustomHeaderActivity::class.java))
         }
     }
 }

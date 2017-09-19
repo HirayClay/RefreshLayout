@@ -8,6 +8,9 @@ import android.view.View
  */
 interface PtrHandler {
 
+
+    fun getView(): View
+
     /**
      * the ptr switch to "Idle" state,do your "Idle" logic  here
      */
@@ -26,7 +29,7 @@ interface PtrHandler {
      * the ptr will be loading,you can trigger your own animation or do your own loading logic here
      * only happen when finger raised(fling or onStopNestedScroll)
      */
-    fun onPreLoading(refreshView: RefreshLayout, ptr: View)
+    fun onLoading(refreshView: RefreshLayout, ptr: View)
 
 
     /**

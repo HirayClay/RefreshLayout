@@ -1,4 +1,4 @@
-package com.ptr
+package com.ptr.custom
 
 import android.content.Context
 import android.graphics.*
@@ -6,6 +6,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import com.ptr.R
 import com.refresh.PtrHandler
 import com.refresh.RefreshLayout
 
@@ -14,6 +15,9 @@ import com.refresh.RefreshLayout
  *@author CJJ
  */
 class CustomRefreshHeader : View, PtrHandler {
+    override fun getView(): View {
+        return this
+    }
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -76,12 +80,12 @@ class CustomRefreshHeader : View, PtrHandler {
         invalidate()
     }
 
-    override fun onPreLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
         state = 2
         invalidate()
     }
 
     override fun onOffsetChange(ratio: Float) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 }

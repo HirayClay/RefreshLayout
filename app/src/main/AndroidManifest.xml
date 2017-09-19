@@ -15,9 +15,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LinearLayoutManagerActivity" />
-        <activity android:name=".TextViewRefreshActivity" />
-        <activity android:name=".GridLayoutManagerActivity"></activity>
+        <activity android:name=".page.LinearLayoutManagerActivity" />
+        <activity android:name=".page.TextViewRefreshActivity" />
+        <activity android:name=".page.GridLayoutManagerActivity" />
+        <activity android:name=".page.CustomHeaderActivity"></activity>
     </application>
 
 </manifest>

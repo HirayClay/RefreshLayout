@@ -1,4 +1,4 @@
-package com.ptr
+package com.ptr.custom
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
+import com.ptr.R
 import com.refresh.PtrHandler
 import com.refresh.RefreshLayout
 
@@ -14,6 +15,10 @@ import com.refresh.RefreshLayout
  *@author CJJ
  */
 class CustomCircleHeader : View, PtrHandler {
+
+    override fun getView(): View {
+        return this
+    }
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -25,6 +30,7 @@ class CustomCircleHeader : View, PtrHandler {
     private var degree: Float = 0f
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        //这个环形箭头图片有一些问题。这个环形箭头是CircleImageView的一个内部类，是可以代码画出来的，可以去SwipeRefreshLayout代码里面找一下
         circleIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.loading_circle)
     }
 
@@ -41,7 +47,7 @@ class CustomCircleHeader : View, PtrHandler {
         onIdle(refreshView, ptr)
     }
 
-    override fun onPreLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
         state = 1
         invalidate()
     }
@@ -64,9 +70,9 @@ class CustomCircleHeader : View, PtrHandler {
             invalidate()
         } else {
             canvas.save()
-            val degree  = 360*ratio
+            val degree = 360 * ratio
             //图片圆环并不是居中的，加上7像素修正一些
-            canvas.rotate(degree, width / 2f, height / 2f+7)
+            canvas.rotate(degree, width / 2f, height / 2f + 7)
             val x = measuredWidth / 2f - circleIcon.width / 2f
             val y = measuredHeight / 2f - circleIcon.height / 2f
             canvas.drawBitmap(circleIcon, x, y, null)

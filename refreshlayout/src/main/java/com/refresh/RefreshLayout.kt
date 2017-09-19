@@ -8,7 +8,9 @@ import android.support.v4.view.ViewCompat
 import android.support.v4.widget.ScrollerCompat
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.Interpolator
@@ -20,12 +22,11 @@ import android.view.animation.Interpolator
  * （只需要给头部刷新控件传入适当的参数即可，不需要控制位置;打开边界布局，我看了ele 安卓客户端首页刷新的实现貌似就是这样做的）,后者有一点麻烦.
  * 用实现NestedScrollingParent接口的方式自定义一个ViewGroup的方式来做是最合适的，比起往Recycler.Adapter里面
  * 加入Item要好的多，因为加入Item的方式某种程度上来说让你的Adapter不得不多一层封装，RecyclerView需要加入刷新的逻辑，让Adapter
- * 和RecyclerView变得复杂了，RecyclerView本身也变味了;而用嵌套滚动机制实现一个刷新控件十分自然，因为对View滑动几乎拥有绝对的控制权；除了用来做刷新，
- * 当需要配合滚动做其他效果，也十分容易。
+ * 和RecyclerView变得复杂了，RecyclerView本身也变味了;而用嵌套滚动机制实现一个刷新控件十分自然，因为对View滑动几乎拥有绝对的控制权
+ * ,而且流程是非常清晰的；除了用来做刷新，当需要配合滚动做其他效果，也十分的容易（比如UC浏览器首页那个效果）。
+ * 这个项目本身最核心的就是RefreshLayout，另外提供了接口可以自定义自己的Header或者Footer，默认的Header不是太漂亮，github上有很多好看的头部控件，
+ * 不过我觉得太花哨除了练习一下自定义效果并没有什么用，基本上公司不会允许用进自家的项目，一般都是每个公司自己设计的刷新头部，所以，还是自己定义吧，demo里面有比较简单的例子
  *
- *
- * 1.阻尼
- * 2.头部底部可替换
  * @author CJJ
  */
 
@@ -35,6 +36,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         val DRAGGING = 1
         //settling to certain position
         val SETTLING = 2
+        val REFRESHING_OR_LOADING = 3
         //special for settling to  top = 0
         var refreshing: Boolean = false
         val SETTLING_DURATION = 300 //ms
@@ -64,26 +66,26 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     var mHeaderHandler: PtrHandler
     lateinit var mFooterHandler: PtrHandler
     var mScroller: ScrollerCompat
-    var headerScroller: ScrollerCompat
     var nestedScrollingParentHelper: NestedScrollingParentHelper
     private var resourceId: Int = -1
     lateinit var mTarget: View
-    var fractor: Float = .3f
     lateinit var listener: RefreshListener
+    var touchSlop: Int
+    var state: Int = IDLE
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.RefreshLayout)
-        mHeader = RefreshHeader(context)
-        mHeaderHandler = mHeader as PtrHandler
+        mHeaderHandler = RefreshHeader(context)
+        mHeader = mHeaderHandler.getView()
         mFooter = RefreshFooter(context)
         resourceId = ta.getResourceId(R.styleable.RefreshLayout_targetId, -1)
         nestedScrollingParentHelper = NestedScrollingParentHelper(this)
         mScroller = ScrollerCompat.create(context, AccelerateInterpolator())
-        headerScroller = ScrollerCompat.create(context, AccelerateInterpolator())
         addView(mHeader)
         addView(mFooter)
+        touchSlop = ViewConfiguration.get(context).scaledTouchSlop
         ta.recycle()
     }
 
@@ -101,6 +103,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     override fun onStopNestedScroll(child: View) {
         settle()
     }
+
 
     override fun onStartNestedScroll(child: View, target: View, nestedScrollAxes: Int): Boolean {
         return ViewCompat.SCROLL_AXIS_VERTICAL and nestedScrollAxes != 0
@@ -163,11 +166,12 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         }
     }
 
-    var state: Int = IDLE
 
     @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
     private fun preScroll(dy: Int): Int {
-
+        Log.i(TAG, "dy::::::::::::::::::$dy ")
+        if (state == SETTLING)
+            return dy
         state = DRAGGING
         var consumedY = 0
 
@@ -247,6 +251,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     /**
      * ....how do i use the velocity to compute the appropriate settling duration???
+     * in fact i omit the fling's influence on destTop, destTop depends on the curTop
      */
     private fun preFling(yVel: Float): Boolean {
         val currTop = mTarget.top
@@ -272,7 +277,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             mScroller.startScroll(0, currTop, 0, mHeader.measuredHeight - currTop, 100)
             state = SETTLING
             headerState = PTR_LOADING
-            mHeaderHandler.onPreLoading(this, mHeader)
+            mHeaderHandler.onLoading(this, mHeader)
 //            mHeader.onStateChange(headerState)
             this.listener.onRefresh()
             ViewCompat.postInvalidateOnAnimation(this)
@@ -298,7 +303,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         } else {
             headerState = PTR_TENSE
             mHeaderHandler.onPrepare(this, mHeader)
-
         }
 
         mHeaderHandler.onOffsetChange(zeroConstrain(mHeader.bottom.toFloat() / mHeader.height))
@@ -308,7 +312,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         } else {
             footerState = PTR_IDLE
         }
-//        mHeader.onStateChange(headerState)
         mFooter.onStateChange(footerState)
     }
 
@@ -332,7 +335,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (headerState == PTR_TENSE) {
             destTop = mHeader.measuredHeight
             headerState = PTR_LOADING
-            mHeaderHandler.onPreLoading(this, mHeader)
+            mHeaderHandler.onLoading(this, mHeader)
 
 //            mHeader.onStateChange(headerState)
             this.listener.onRefresh()
@@ -364,7 +367,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         return ((distance + 0f) / BASE_PULL_DOWN_HEIGHT * SETTLING_DURATION).toInt()
     }
 
-    //无法知道此时header 和footer的状态
     override fun computeScroll() {
 
         if (mScroller.computeScrollOffset()) {
@@ -376,8 +378,17 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             mFooter.offsetTopAndBottom(footerTop - mFooter.top)
             mTarget.offsetTopAndBottom(scrollY)
 //            mHeaderHandler.onOffsetChange()
-
             ViewCompat.postInvalidateOnAnimation(this)
+        } else {
+            if (state == SETTLING) {
+                if (mScroller.finalY == mHeader.height || mScroller.finalY == -mFooter.height)
+                    state = REFRESHING_OR_LOADING
+                else if (mScroller.finalY == 0)
+                {
+                    Log.i(TAG, "DDDDDDDDDDDDDDDDDDD")
+                    state = IDLE
+                }
+            }
         }
 
     }
@@ -441,14 +452,10 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     }
 
 
-    fun setHeader(header: View) {
+    fun setHeader(header: PtrHandler) {
         removeView(mHeader)
-        this.mHeader = header
-        if (header is PtrHandler)
-            this.mHeaderHandler = header
-        else {
-            throw IllegalStateException("custom header must implement PtrHandler interface!")
-        }
+        this.mHeader = header.getView()
+        this.mHeaderHandler = header
         addView(mHeader)
         invalidate()
         requestLayout()
@@ -457,16 +464,16 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     fun onRefreshComplete() {
 
         //如果在停止刷新时候用户正在滑动，则取消此次settle
-        if (state != DRAGGING) {
-            Log.i(TAG, "Settling==================")
-            state = IDLE
-            headerState = PTR_IDLE
-            footerState = PTR_IDLE
-            mHeaderHandler.onIdle(this, mHeader)
-//            mHeader.onStateChange(headerState)
-            mFooter.onStateChange(footerState)
-            settle()
-        }
+//        if (state != DRAGGING) {
+//            Log.i(TAG, "Settling==================")
+//            state = IDLE
+//            headerState = PTR_IDLE
+//            footerState = PTR_IDLE
+//            mHeaderHandler.onIdle(this, mHeader)
+////            mHeader.onStateChange(headerState)
+//            mFooter.onStateChange(footerState)
+        settle()
+//        }
     }
 
     private fun zeroConstrain(value: Float): Float {
