@@ -38,22 +38,22 @@ class LinearLayoutManagerActivity : AppCompatActivity() {
 
         })
         recyclerView.adapter = itemsAdapter
-//
-//        refreshlayout.setRefreshListener(object : RefreshListener {
-//            override fun onLoadMore() {
-//                window.decorView.postDelayed({
-//                    itemsAdapter.addFooter(R.mipmap.load_more, "CryPretty")
-//                    refreshlayout.onRefreshComplete()
-//                }, 1000)
-//            }
-//
-//            override fun onRefresh() {
-//                window.decorView.postDelayed({
-//                    itemsAdapter.addHeader(R.mipmap.newly_add, "Doraemon No.${index++}")
-//                    refreshlayout.onRefreshComplete()
-//                }, 1000)
-//            }
-//
-//        })
+
+        refreshlayout.setRefreshListener(object : RefreshListener {
+            override fun onLoadMore() {
+                window.decorView.postDelayed({
+                    itemsAdapter.addFooter(R.mipmap.load_more, "CryPretty")
+                    refreshlayout.onRefreshComplete()
+                }, 1000)
+            }
+
+            override fun onRefresh() {
+                window.decorView.postDelayed({
+                    itemsAdapter.addHeader(R.mipmap.newly_add, "Doraemon No.${index++}")
+                    refreshlayout.onRefreshComplete()
+                }, 6000)
+            }
+
+        })
     }
 }

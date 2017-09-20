@@ -8,6 +8,7 @@ import android.support.v4.view.ViewCompat
 import android.support.v4.widget.ScrollerCompat
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
@@ -24,7 +25,7 @@ import android.view.animation.Interpolator
  * 和RecyclerView变得复杂了，RecyclerView本身也变味了;而用嵌套滚动机制实现一个刷新控件十分自然，因为对View滑动几乎拥有绝对的控制权
  * ,而且流程是非常清晰的；除了用来做刷新，当需要配合滚动做其他效果，也十分的容易（比如UC浏览器首页那个效果）。
  * 这个项目本身最核心的就是RefreshLayout，另外提供了接口可以自定义自己的Header或者Footer，默认的Header不是太漂亮，github上有很多好看的头部控件，
- * 不过我觉得太花哨除了练习一下自定义效果并没有什么用，基本上公司不会允许用进自家的项目，一般都是每个公司自己设计的刷新头部，所以，还是自己定义吧，demo里面有比较简单的例子
+ * 不过我觉得太花哨除了练习一下自定义效果并没有什么用，基本上公司不会允许用进自家的项目，一般都是每个公司自己设计的刷新头部，所以，还是自己定义吧，demo里面有比较完整简单的例子
  *
  * @author CJJ
  */
@@ -40,7 +41,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         val FORCE = 4
         //special for settling to  top = 0
         var refreshing: Boolean = false
-        val SETTLING_DURATION = 1300 //ms
+        val SETTLING_DURATION = 300 //ms
 
         //tags for ptr
         val PTR_IDLE = 0
@@ -101,7 +102,13 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     }
 
-    override fun onStopNestedScroll(child: View) {
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        return super.onInterceptTouchEvent(ev)
+    }
+
+    //对于NestedScrollView有bug,手指按下去就调用这个方法
+    //因为在View的dispatchTouchEvent 方法里面手指按下去会调用stopNestedScroll,NestedScrollView
+    override fun onStopNestedScroll(child: View?) {
         settle()
     }
 
@@ -112,6 +119,9 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
+        //a new nested scroll start ,reset the state to "IDLE"
+        if (state == FORCE)
+            state = IDLE
         nestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes)
     }
 
@@ -170,7 +180,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
     private fun preScroll(dy: Int): Int {
-        Log.i(TAG, "dy::::::::::::::::::$dy $state")
+        Log.i(TAG, "before::::::::::::::::::$dy ${stateString(state)}")
         if (state == SETTLING || state == FORCE)
             return dy
         state = DRAGGING
@@ -246,8 +256,18 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
         if (curTop != 0)
             refresh()
-
+        Log.i(TAG, "after::::::::::::::::::$dy ${stateString(state)}")
         return consumedY
+    }
+
+    private fun stateString(state: Int) = when (state) {
+
+        DRAGGING -> "DRAGGING"
+        FORCE -> "FORCE"
+        REFRESHING_OR_LOADING -> "REFRESHING_OR_LOADING"
+        IDLE -> "IDLE"
+        SETTLING -> "SETTLING"
+        else -> ""
     }
 
     /**
@@ -391,8 +411,10 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
                 }
             }
 
-            if (state == FORCE)
-                state = IDLE
+            //forece 之后，不再接收滚动，必须开始一次新的滚动
+//
+//            if (state == FORCE)
+//                state = IDLE
         }
 
     }

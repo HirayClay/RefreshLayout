@@ -40,7 +40,7 @@ If your target view is subclass of NestedScrollingChild,your layout file is like
     
         </com.refresh.RefreshLayout>
 ```
-or not ,you can wrap  view in NestedScrollView
+or not ,you can wrap  view in SafeNestedScrollView
 
 ```xml
     
@@ -50,7 +50,7 @@ or not ,you can wrap  view in NestedScrollView
         android:layout_height="match_parent"
         app:targetId="@+id/wrapper">
 
-        <android.support.v4.widget.NestedScrollView
+        <com.refresh.SafeNestedScrollView
             android:id="@+id/wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -61,7 +61,7 @@ or not ,you can wrap  view in NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/large_text" />
-        </android.support.v4.widget.NestedScrollView>
+        </com.refresh.SafeNestedScrollView>
 
 
     </com.refresh.RefreshLayout>
