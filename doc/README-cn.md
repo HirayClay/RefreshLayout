@@ -42,7 +42,7 @@
         android:layout_height="match_parent"
         app:targetId="@+id/wrapper">
 
-        <android.support.v4.widget.NestedScrollView
+        <com.refreh.SafeNestedScrollView
             android:id="@+id/wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -53,7 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/large_text" />
-        </android.support.v4.widget.NestedScrollView>
+        </com.refreh.SafeNestedScrollView>
 
 
     </com.refresh.RefreshLayout>

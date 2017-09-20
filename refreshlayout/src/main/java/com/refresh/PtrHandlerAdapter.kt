@@ -7,9 +7,7 @@ import android.view.View
  *@author CJJ
  */
 class PtrHandlerAdapter : PtrHandler {
-    override fun getView(): View {
-        return null!!
-    }
+    override fun getView(): View = null!!
 
     override fun onOffsetChange(ratio: Float) {
         /*empty*/

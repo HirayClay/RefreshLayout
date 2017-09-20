@@ -31,6 +31,9 @@ import android.view.animation.Interpolator
  */
 
 class RefreshLayout : ViewGroup, NestedScrollingParent {
+    val DEBUG = true
+
+
     companion object {
         val IDLE = 0
         val DRAGGING = 1
@@ -41,7 +44,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         val FORCE = 4
         //special for settling to  top = 0
         var refreshing: Boolean = false
-        val SETTLING_DURATION = 300 //ms
+        val SETTLING_DURATION = 600 //ms
 
         //tags for ptr
         val PTR_IDLE = 0
@@ -106,8 +109,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         return super.onInterceptTouchEvent(ev)
     }
 
-    //对于NestedScrollView有bug,手指按下去就调用这个方法
-    //因为在View的dispatchTouchEvent 方法里面手指按下去会调用stopNestedScroll,NestedScrollView
     override fun onStopNestedScroll(child: View?) {
         settle()
     }
@@ -122,7 +123,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         //a new nested scroll start ,reset the state to "IDLE"
         if (state == FORCE)
             state = IDLE
-        nestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes)
     }
 
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray) {
@@ -135,9 +135,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         mTarget.offsetTopAndBottom(-dyUnconsumed)
     }
 
-    override fun getNestedScrollAxes(): Int {
-        return nestedScrollingParentHelper.nestedScrollAxes
-    }
 
     override fun onNestedPreFling(target: View?, velocityX: Float, velocityY: Float): Boolean {
         return preFling(velocityY)
@@ -180,7 +177,8 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER")
     private fun preScroll(dy: Int): Int {
-        Log.i(TAG, "before::::::::::::::::::$dy ${stateString(state)}")
+        if (DEBUG)
+            Log.i(TAG, "before::::::::::::::::::$dy ${stateString(state)}")
         if (state == SETTLING || state == FORCE)
             return dy
         state = DRAGGING
@@ -253,22 +251,14 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
                 mFooter.layout(0, footerTop, mFooter.measuredWidth, footerTop + mFooter.measuredHeight)
             mTarget.offsetTopAndBottom(scrollY)
         }
+        if (DEBUG)
+            Log.i(TAG, "after::::::::::::::::::$dy ${stateString(state)}")
 
         if (curTop != 0)
-            refresh()
-        Log.i(TAG, "after::::::::::::::::::$dy ${stateString(state)}")
+            refreshState()
         return consumedY
     }
 
-    private fun stateString(state: Int) = when (state) {
-
-        DRAGGING -> "DRAGGING"
-        FORCE -> "FORCE"
-        REFRESHING_OR_LOADING -> "REFRESHING_OR_LOADING"
-        IDLE -> "IDLE"
-        SETTLING -> "SETTLING"
-        else -> ""
-    }
 
     /**
      * ....how do i use the velocity to compute the appropriate settling duration???
@@ -283,7 +273,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (currTop == 0)
             return false
 
-        refreshing = true
 
         if (currTop <= -mFooter.measuredHeight) {
             val duration = (SETTLING_DURATION * durationInterpolator.getInterpolation(yVel / MAX_VEL)).toInt() / 3
@@ -307,7 +296,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             mScroller.startScroll(0, currTop, 0, -currTop, 100)
             state = SETTLING
             ViewCompat.postInvalidateOnAnimation(this)
-            refreshing = false
         }
 
         //让内部View滚动
@@ -317,7 +305,8 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     //我们这里只是改变刷新控件的状态，并且给footer ，header打下标记，这些标记对应的行为(也就是说这些标记是为了settle准备的)
     // 在onStopNestedScroll里面去触发
-    private fun refresh() {
+    private fun refreshState() {
+//        if (state != REFRESHING_OR_LOADING)
         if (mHeader.top <= 0) {
             headerState = PTR_IDLE
             mHeaderHandler.onIdle(this, mHeader)
@@ -351,7 +340,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (curTop == 0 || state == SETTLING || state == FORCE)
             return
 
-        refreshing = true
 
         if (headerState == PTR_TENSE) {
             destTop = mHeader.measuredHeight
@@ -370,23 +358,14 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             footerState = PTR_IDLE
             mHeaderHandler.onIdle(this, mHeader)
             destTop = 0
-            refreshing = false
         }
 
         state = SETTLING
 
-        Log.i(TAG, "SSSSSSSSSSSSSSSS")
         val deltaY = destTop - curTop
         val duration = linearDuration(Math.abs(deltaY))
         mScroller.startScroll(0, curTop, 0, deltaY, duration)
         ViewCompat.postInvalidateOnAnimation(this)
-    }
-
-    /**
-     * linear duration is bad for effect
-     */
-    private fun linearDuration(distance: Int): Int {
-        return ((distance + 0f) / BASE_PULL_DOWN_HEIGHT * SETTLING_DURATION).toInt()
     }
 
     override fun computeScroll() {
@@ -399,51 +378,36 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             mHeader.offsetTopAndBottom(headerTop - mHeader.top)
             mFooter.offsetTopAndBottom(footerTop - mFooter.top)
             mTarget.offsetTopAndBottom(scrollY)
-//            mHeaderHandler.onOffsetChange()
             ViewCompat.postInvalidateOnAnimation(this)
         } else {
             if (state == SETTLING) {
                 if (mScroller.finalY == mHeader.height || mScroller.finalY == -mFooter.height)
                     state = REFRESHING_OR_LOADING
                 else if (mScroller.finalY == 0) {
-                    Log.i(TAG, "DDDDDDDDDDDDDDDDDDD")
                     state = IDLE
                 }
             }
 
-            //forece 之后，不再接收滚动，必须开始一次新的滚动
-//
-//            if (state == FORCE)
-//                state = IDLE
+            //settle完成之后从
+            if (state == FORCE) {
+                headerState = PTR_IDLE
+                footerState = PTR_IDLE
+                mHeaderHandler.onIdle(this, mHeader)
+
+            }
         }
 
     }
 
     /**
      * scroll with resistance ,use piece-wise function
-     * 用的分段函数,让下拉越来越困难,模拟阻尼效果
-     * 0<curTop<250 f(x) = -x/1250+1
-     * curTop>250 f(x) = 200/x
+     * 模拟阻尼效果,直接乘以一个常数就好了
      */
     private fun computeRealScrollY(dy: Int, distance: Int): Int {
-        val sign = if (distance < 0) -1 else 1
 
-        if (Math.abs(distance) in 0..550)
-            return (dy * (-distance * sign / 1250f + 1f)).toInt()
-        else return (sign * dy * 200f / distance).toInt()
-
-        /*equal to below */
-        /*
-        if (distance >= 0)
-            if (distance in 0..550)
-                return (dy * (-distance / 1250f + 1)).toInt()
-            else return (dy * 200f / distance).toInt()
-        else {
-            if (distance in -550..0)
-                return (dy * (distance / 1250f + 1)).toInt()
-            else return (-dy * 200f / distance).toInt()
-        }
-        */
+        if (distance in -2 * mFooter.height..2 * mHeader.height)
+            return dy / 2
+        else return if (dy > 0) 1 else -1
     }
 
     private fun headerPos(distance: Int): Int {
@@ -473,6 +437,14 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         return r
     }
 
+    /**
+     * linear duration is bad for effect
+     */
+    private fun linearDuration(distance: Int): Int {
+        val r = ((distance + 0f) / BASE_PULL_DOWN_HEIGHT * SETTLING_DURATION).toInt()
+        return if (r > 500) 500 else r
+    }
+
     fun setRefreshListener(listener: RefreshListener) {
         this.listener = listener
     }
@@ -494,9 +466,9 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     private fun forceSettleToTop() {
         state = FORCE
-        val curTop = mHeader.top
+        val curTop = mTarget.top
         val deltaY = -curTop
-        mScroller.startScroll(0, curTop, 0, deltaY, linearDuration(curTop))
+        mScroller.startScroll(0, curTop, 0, deltaY, linearDuration(Math.abs(deltaY)))
         ViewCompat.postInvalidateOnAnimation(this)
     }
 
@@ -504,6 +476,15 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         if (value <= 0f)
             return 0f
         else return value
+    }
 
+
+    private fun stateString(state: Int) = when (state) {
+        IDLE -> "IDLE"
+        DRAGGING -> "DRAGGING"
+        REFRESHING_OR_LOADING -> "REFRESHING_OR_LOADING"
+        SETTLING -> "SETTLING"
+        FORCE -> "FORCE"
+        else -> ""
     }
 }

@@ -31,7 +31,7 @@ interface PtrHandler {
      */
     fun onLoading(refreshView: RefreshLayout, ptr: View)
 
-
+//    fun onLoadingComplete(refreshView: RefreshLayout,ptr: View)
     /**
      * the offset ptr was pulling over,range from 0f(ptr is fully hidden) to n( when n =1f ,ptr is fully revealed)
      *  ratio is large than 1f indicates ptr is over pulled down or pulled up

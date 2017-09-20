@@ -30,7 +30,7 @@ class CustomCircleHeader : View, PtrHandler {
     private var degree: Float = 0f
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        //这个环形箭头图片有一些问题。这个环形箭头是CircleImageView的一个内部类，是可以代码画出来的，可以去SwipeRefreshLayout代码里面找一下
+        //这个环形箭头图片有一些问题。环形箭头是CircleImageView的一个内部类，是可以代码画出来的，可以去SwipeRefreshLayout代码里面找一下
         circleIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.loading_circle)
     }
 
