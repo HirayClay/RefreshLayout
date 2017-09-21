@@ -9,9 +9,7 @@
 实现思路也比较简单，刷新控件无非那几种状态互相切换 idle ,loading ,settling,prepare。
 
 ## Display
-<img src="static/pure.gif"  width="400" height="630"/> 
-<img src="static/ll.gif"   width="400" height="630"/>
-<img src="static/ele.gif"  width="400" height="630"/>
+<img src="static/ll.gif"   width="400" height="630"/> <img src="static/ele.gif"  width="400" height="630"/>
 
 
 ## Usage
