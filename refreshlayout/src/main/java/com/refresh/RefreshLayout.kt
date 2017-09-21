@@ -264,7 +264,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     /**
      * ....how do i use the velocity to compute the appropriate settling duration???
-     * in fact i omit the fling's influence on destTop, destTop depends on the curTop
+     * in fact i ignore the fling's influence on destTop, destTop depends on the curTop
      */
     private fun preFling(yVel: Float): Boolean {
         val currTop = mTarget.top
