@@ -31,7 +31,7 @@ import android.view.animation.Interpolator
  */
 
 class RefreshLayout : ViewGroup, NestedScrollingParent {
-    val DEBUG = true
+    val DEBUG = false
 
 
     companion object {
@@ -44,7 +44,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         val FORCE = 4
         //special for settling to  top = 0
         var refreshing: Boolean = false
-        val SETTLING_DURATION = 600 //ms
+        val SETTLING_DURATION = 400 //ms
 
         //tags for ptr
         val PTR_IDLE = 0
@@ -80,8 +80,12 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    private var mSettleDuration: Int
+
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         val ta = context.obtainStyledAttributes(attrs, R.styleable.RefreshLayout)
+        mSettleDuration = ta.getInt(R.styleable.RefreshLayout_refresh_settle_duration, 240)
         mHeaderHandler = RefreshHeader(context)
         mHeader = mHeaderHandler.getView()
         mFooter = RefreshFooter(context)
@@ -298,7 +302,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
             ViewCompat.postInvalidateOnAnimation(this)
         }
 
-        //让内部View滚动
+        //让内部View处理,自己不要搞事情
         return false
     }
 
@@ -306,15 +310,15 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
     //我们这里只是改变刷新控件的状态，并且给footer ，header打下标记，这些标记对应的行为(也就是说这些标记是为了settle准备的)
     // 在onStopNestedScroll里面去触发
     private fun refreshState() {
-//        if (state != REFRESHING_OR_LOADING)
-        if (mHeader.top <= 0) {
-            headerState = PTR_IDLE
-            mHeaderHandler.onIdle(this, mHeader)
-        } else {
-            headerState = PTR_TENSE
-            mHeaderHandler.onPrepare(this, mHeader)
-        }
-
+        if (headerState != PTR_LOADING)
+            if (mHeader.top <= 0) {
+                headerState = PTR_IDLE
+                mHeaderHandler.onIdle(this, mHeader)
+            } else {
+                headerState = PTR_TENSE
+                mHeaderHandler.onPrepare(this, mHeader)
+            }
+        Log.i(TAG, "${mHeader.bottom}   :   ${mHeader.height}")
         mHeaderHandler.onOffsetChange(zeroConstrain(mHeader.bottom.toFloat() / mHeader.height))
 
         if (mFooter.bottom <= measuredHeight) {
@@ -336,20 +340,22 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         val curTop = mTarget.top
         var destTop = 0
 
+        var duration = mSettleDuration
+
+
         //already in "settling" state or start a new nest scroll ,cancel this settle
         if (curTop == 0 || state == SETTLING || state == FORCE)
             return
-
 
         if (headerState == PTR_TENSE) {
             destTop = mHeader.measuredHeight
             headerState = PTR_LOADING
             mHeaderHandler.onLoading(this, mHeader)
-
-//            mHeader.onStateChange(headerState)
+            duration = linearDuration(Math.abs(destTop - curTop))
             this.listener.onRefresh()
         } else if (footerState == PTR_TENSE) {
             destTop = -mFooter.measuredHeight
+            duration = linearDuration(Math.abs(destTop - curTop))
             footerState = PTR_LOADING
             mFooter.onStateChange(footerState)
             this.listener.onLoadMore()
@@ -361,9 +367,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         }
 
         state = SETTLING
-
         val deltaY = destTop - curTop
-        val duration = linearDuration(Math.abs(deltaY))
         mScroller.startScroll(0, curTop, 0, deltaY, duration)
         ViewCompat.postInvalidateOnAnimation(this)
     }
@@ -455,7 +459,6 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         this.mHeader = header.getView()
         this.mHeaderHandler = header
         addView(mHeader)
-        invalidate()
         requestLayout()
     }
 
@@ -468,7 +471,7 @@ class RefreshLayout : ViewGroup, NestedScrollingParent {
         state = FORCE
         val curTop = mTarget.top
         val deltaY = -curTop
-        mScroller.startScroll(0, curTop, 0, deltaY, linearDuration(Math.abs(deltaY)))
+        mScroller.startScroll(0, curTop, 0, deltaY, mSettleDuration)
         ViewCompat.postInvalidateOnAnimation(this)
     }
 

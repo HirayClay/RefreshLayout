@@ -24,13 +24,13 @@ class LinearLayoutManagerActivity : AppCompatActivity() {
             ITEMS.add(i.toString())
         }
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
-
-            override fun getItemOffsets(outRect: Rect, view: View?, parent: RecyclerView?, state: RecyclerView.State?) {
-                outRect.bottom = 2
-            }
-
-        })
+//        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
+//
+//            override fun getItemOffsets(outRect: Rect, view: View?, parent: RecyclerView?, state: RecyclerView.State?) {
+//                outRect.bottom = 2
+//            }
+//
+//        })
         itemsAdapter = ItemsAdapter(ITEMS, object : ItemsAdapter.OnItemClickListener {
             override fun handle(position: Int) {
 

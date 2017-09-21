@@ -4,6 +4,7 @@
         <attr name="targetId" format="reference" />
         <attr name="header_scrim_color" format="color" />
         <attr name="footer_scrim_color" format="color" />
+        <attr name="refresh_settle_duration" format="integer"/>
     </declare-styleable>
 
     <dimen name="refreshview_height">30dp</dimen>

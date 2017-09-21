@@ -27,7 +27,7 @@ class IndexActivity : AppCompatActivity() {
         index_gridlayoutmanager.setOnClickListener {
             startActivity(Intent(this@IndexActivity, GridLayoutManagerActivity::class.java))
         }
-        index_custom_header.setOnClickListener {
+        index_ele_style_header.setOnClickListener {
             startActivity(Intent(this@IndexActivity, CustomHeaderActivity::class.java))
         }
     }
