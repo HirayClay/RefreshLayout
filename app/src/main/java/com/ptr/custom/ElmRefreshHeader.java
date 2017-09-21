@@ -78,8 +78,8 @@ public class ElmRefreshHeader extends View implements PtrHandler {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(210,MeasureSpec.EXACTLY));
-        setPadding(10,0,0,20);
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(250,MeasureSpec.EXACTLY));
+        setPadding(0,20,0,20);
         width = getMeasuredWidth();
         height = getMeasuredHeight();
         init();
@@ -240,25 +240,35 @@ public class ElmRefreshHeader extends View implements PtrHandler {
     }
 
     @Override
-    public void onIdle(@NonNull RefreshLayout refreshView, @NonNull View ptr) {
+    public void onIdle(@NonNull RefreshLayout refreshView) {
         setStatus(ElmRefreshHeader.STATUS_STOP);
         setStatus(ElmRefreshHeader.STATUS_MOVING);
     }
 
     @Override
-    public void onPrepare(@NonNull RefreshLayout refreshView, @NonNull View ptr) {
+    public void onPrepare(@NonNull RefreshLayout refreshView) {
 
     }
 
     @Override
-    public void onLoading(@NonNull RefreshLayout refreshView, @NonNull View ptr) {
+    public void onLoading(@NonNull RefreshLayout refreshView) {
         setStatus(STATUS_RUNNING);
     }
 
     @Override
-    public void onOffsetChange(float ratio) {
-        Log.i(TAG, "onOffsetChange: " + ratio);
+    public void onPositionChange(float ratio) {
+        Log.i(TAG, "onPositionChange: " + ratio);
         setPullPositionChanged(ratio);
+    }
+
+    @Override
+    public void onLoadMoreComplete(@NonNull RefreshLayout refreshView) {
+
+    }
+
+    @Override
+    public void onRefreshComplete(@NonNull RefreshLayout refreshView) {
+
     }
 
     private class ElmFood {

@@ -33,7 +33,7 @@ class TextViewRefreshActivity : AppCompatActivity() {
                 window.decorView.postDelayed({
                     textview.text = getString(if (alternative) R.string.lorem else R.string.large_text)
                     refreshlayout.onRefreshComplete()
-                }, 6000)
+                }, 1500)
             }
 
         })

@@ -35,7 +35,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:padding="15px"
-        android:text="RecyclerView With GridLayoutManager"
+        android:text="Ele Style Header With GridLayoutManager"
         android:textAllCaps="false" />
 
     <android.support.v7.widget.AppCompatButton
@@ -45,6 +45,6 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:padding="15px"
-        android:text="Ele Style Header"
+        android:text="Boring  Header"
         android:textAllCaps="false" />
 </LinearLayout>

@@ -18,7 +18,7 @@
         <activity android:name=".page.LinearLayoutManagerActivity" />
         <activity android:name=".page.TextViewRefreshActivity" />
         <activity android:name=".page.GridLayoutManagerActivity" />
-        <activity android:name=".page.CustomHeaderActivity"></activity>
+        <activity android:name=".page.UglyCustomHeaderActivity"></activity>
     </application>
 
 </manifest>

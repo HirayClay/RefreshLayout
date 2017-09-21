@@ -9,19 +9,19 @@ import android.view.View
 class PtrHandlerAdapter : PtrHandler {
     override fun getView(): View = null!!
 
-    override fun onOffsetChange(ratio: Float) {
+    override fun onPositionChange(ratio: Float) {
         /*empty*/
     }
 
-    override fun onIdle(refreshView: RefreshLayout, ptr: View) {
+    override fun onIdle(refreshView: RefreshLayout) {
         /*empty*/
     }
 
-    override fun onPrepare(refreshView: RefreshLayout, ptr: View) {
+    override fun onPrepare(refreshView: RefreshLayout) {
         /*empty*/
     }
 
-    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout) {
         /*empty*/
     }
 }

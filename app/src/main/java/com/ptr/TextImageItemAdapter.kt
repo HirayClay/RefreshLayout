@@ -11,20 +11,18 @@ import android.view.ViewGroup
  * Created by CJJ on 2017/9/6.
  *@author CJJ
  */
-class ItemsAdapter : RecyclerView.Adapter<ItemsAdapter.VH> {
+class TextImageItemAdapter : RecyclerView.Adapter<TextImageItemAdapter.VH> {
 
-    var ITEMS: ArrayList<String>? = null
     lateinit var inflater: LayoutInflater
 
-    var IMG = arrayListOf(R.mipmap.china, R.mipmap.iceland, R.mipmap.poland, R.mipmap.denmark,
-            R.mipmap.german, R.mipmap.russia, R.mipmap.french, R.mipmap.finland,
-            R.mipmap.czech, R.mipmap.norway, R.mipmap.swedish, R.mipmap.indian, R.mipmap.japan, R.mipmap.vietnam)
-    var NAM = arrayListOf("China", "IceLand", "Poland", "Denmark", "German", "Russia", "France", "Finland", "Czech", "Norway", "Swedish"
-            , "Indian", "Japan", "Vietnam")
+    var IMG: ArrayList<Int>
+    var NAM: ArrayList<String>
+    var itemLayout: Int
 
-
-    constructor(ITEMS: ArrayList<String>?, OnItemClickListener: OnItemClickListener?) : super() {
-        this.ITEMS = ITEMS
+    constructor(imgs: ArrayList<Int>, names: ArrayList<String>, layout: Int, OnItemClickListener: OnItemClickListener?) : super() {
+        this.IMG = imgs
+        this.NAM = names
+        this.itemLayout = layout
         Companion.OnItemClickListener = OnItemClickListener
     }
 
@@ -46,7 +44,7 @@ class ItemsAdapter : RecyclerView.Adapter<ItemsAdapter.VH> {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         inflater = LayoutInflater.from(parent.context)
-        var rootView = inflater.inflate(R.layout.item_text, parent, false)
+        val rootView = inflater.inflate(itemLayout, parent, false)
         return VH(rootView)
     }
 
@@ -54,7 +52,7 @@ class ItemsAdapter : RecyclerView.Adapter<ItemsAdapter.VH> {
         holder.textview.text = NAM[position % NAM.size]
         holder.logo.setImageResource(IMG[position % NAM.size])
         holder.itemView.setOnClickListener {
-            Companion.OnItemClickListener!!.handle(position)
+            Companion.OnItemClickListener!!.onItemClick(position)
         }
     }
 
@@ -67,7 +65,7 @@ class ItemsAdapter : RecyclerView.Adapter<ItemsAdapter.VH> {
 
 
     interface OnItemClickListener {
-        fun handle(position: Int)
+        fun onItemClick(position: Int)
     }
 
     companion object {

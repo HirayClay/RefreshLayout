@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.ptr.page.CustomHeaderActivity">
+    tools:context="com.ptr.page.UglyCustomHeaderActivity">
 
 
     <com.refresh.RefreshLayout

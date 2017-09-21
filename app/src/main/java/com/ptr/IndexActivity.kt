@@ -3,7 +3,7 @@ package com.ptr
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.ptr.page.CustomHeaderActivity
+import com.ptr.page.UglyCustomHeaderActivity
 import com.ptr.page.GridLayoutManagerActivity
 import com.ptr.page.LinearLayoutManagerActivity
 import com.ptr.page.TextViewRefreshActivity
@@ -28,7 +28,7 @@ class IndexActivity : AppCompatActivity() {
             startActivity(Intent(this@IndexActivity, GridLayoutManagerActivity::class.java))
         }
         index_ele_style_header.setOnClickListener {
-            startActivity(Intent(this@IndexActivity, CustomHeaderActivity::class.java))
+            startActivity(Intent(this@IndexActivity, UglyCustomHeaderActivity::class.java))
         }
     }
 }

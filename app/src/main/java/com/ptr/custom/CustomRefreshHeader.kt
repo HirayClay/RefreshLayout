@@ -70,22 +70,22 @@ class CustomRefreshHeader : View, PtrHandler {
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(150 + loadingIcon.height, MeasureSpec.EXACTLY))
     }
 
-    override fun onIdle(refreshView: RefreshLayout, ptr: View) {
+    override fun onIdle(refreshView: RefreshLayout) {
         state = 0
         invalidate()
     }
 
-    override fun onPrepare(refreshView: RefreshLayout, ptr: View) {
+    override fun onPrepare(refreshView: RefreshLayout) {
         state = 1
         invalidate()
     }
 
-    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout) {
         state = 2
         invalidate()
     }
 
-    override fun onOffsetChange(ratio: Float) {
+    override fun onPositionChange(ratio: Float) {
 
     }
 }

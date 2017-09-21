@@ -19,19 +19,19 @@ class EmptyRefreshView : PtrHandler {
         return mView
     }
 
-    override fun onIdle(refreshView: RefreshLayout, ptr: View) {
+    override fun onIdle(refreshView: RefreshLayout) {
         /*no op*/
     }
 
-    override fun onPrepare(refreshView: RefreshLayout, ptr: View) {
+    override fun onPrepare(refreshView: RefreshLayout) {
         /*no op*/
     }
 
-    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout) {
         /*no op*/
     }
 
-    override fun onOffsetChange(ratio: Float) {
+    override fun onPositionChange(ratio: Float) {
         /*no op*/
     }
 }

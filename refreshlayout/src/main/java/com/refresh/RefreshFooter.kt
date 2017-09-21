@@ -13,7 +13,30 @@ import android.view.View
  * @author CJJ
  */
 
-class RefreshFooter : View {
+class RefreshFooter : View, PtrHandler {
+    override fun getView(): View {
+        return this
+    }
+
+    override fun onIdle(refreshView: RefreshLayout) {
+        this.state = RefreshLayout.IDLE
+        invalidate()
+    }
+
+    override fun onPrepare(refreshView: RefreshLayout) {
+        this.state = RefreshLayout.PTR_TENSE
+        invalidate()
+    }
+
+    override fun onLoading(refreshView: RefreshLayout) {
+        this.state = RefreshLayout.PTR_LOADING
+        invalidate()
+    }
+
+    override fun onPositionChange(ratio: Float) {
+        /*no op*/
+    }
+
 
     var loadingIcon: Bitmap
     var state: Int = RefreshLayout.PTR_IDLE
@@ -21,7 +44,7 @@ class RefreshFooter : View {
     var IDLE_TEXT: String
     var textPaint: TextPaint
     var loadMoreTextWidth: Float = 0f
-    var idleTextWidth:Float=0f
+    var idleTextWidth: Float = 0f
     var space: Int = 0
     var angle: Float = 0f
     val DEGREE = 10f
@@ -68,7 +91,6 @@ class RefreshFooter : View {
     }
 
     fun onStateChange(state: Int) {
-        this.state = state
-        invalidate()
+
     }
 }

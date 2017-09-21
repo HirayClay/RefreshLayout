@@ -18,22 +18,22 @@ class RefreshHeader : View, PtrHandler {
         return this
     }
 
-    override fun onIdle(refreshView: RefreshLayout, ptr: View) {
+    override fun onIdle(refreshView: RefreshLayout) {
         this.state = RefreshLayout.IDLE
         invalidate()
     }
 
-    override fun onPrepare(refreshView: RefreshLayout, ptr: View) {
+    override fun onPrepare(refreshView: RefreshLayout) {
         this.state = RefreshLayout.PTR_TENSE
         invalidate()
     }
 
-    override fun onLoading(refreshView: RefreshLayout, ptr: View) {
+    override fun onLoading(refreshView: RefreshLayout) {
         this.state = RefreshLayout.PTR_LOADING
         invalidate()
     }
 
-    override fun onOffsetChange(ratio: Float) {
+    override fun onPositionChange(ratio: Float) {
         //todo
     }
 
@@ -42,7 +42,7 @@ class RefreshHeader : View, PtrHandler {
     var loadingIcon: Bitmap
     var textPaint: TextPaint
     val DEGREE = 10f
-    val IDLE_TEXT:String
+    val IDLE_TEXT: String
     val RELEASE_LOADING: String
     var angle = 0f
     val THRESHOLD = 0.8f
@@ -51,14 +51,14 @@ class RefreshHeader : View, PtrHandler {
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     private var tenseTextWidth: Float
-    private var idleTextWidth:Float
+    private var idleTextWidth: Float
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         space = context.resources.getDimensionPixelSize(R.dimen.refreshview_space)
         arrowIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.arrow)
         loadingIcon = BitmapFactory.decodeResource(context.resources, R.mipmap.loading)
         RELEASE_LOADING = resources.getString(R.string.release_refresh_text)
-        IDLE_TEXT=context.resources.getString(R.string.refresh_footer_idle_text)
+        IDLE_TEXT = context.resources.getString(R.string.refresh_footer_idle_text)
         textPaint = TextPaint()
         textPaint.color = Color.BLACK
         textPaint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13f, resources.displayMetrics)
