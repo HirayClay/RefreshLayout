@@ -28,7 +28,7 @@
     
         </com.refresh.RefreshLayout>
 ```
-要是没有实现这个接口的，就包裹在NestedScrollView里就好了，记得给RefreshLayout指定targetId
+要是没有实现这个接口的，就包裹在SafeNestedScrollView里就好了，记得给RefreshLayout指定targetId
 
 ```xml
     
