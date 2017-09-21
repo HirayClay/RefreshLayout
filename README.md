@@ -6,9 +6,9 @@
 
 
 ## Display
-<img src="static/pure.gif"/>
-<img src="static/ll.gif"/>
-<img src="static/ele.gif"/>
+<img src="static/pure.gif"  width="400" height="630"/>
+<img src="static/ll.gif"   width="400" height="630"/>
+<img src="static/ele.gif"  width="400" height="630"/>
 
 
 ## Usage
