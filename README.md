@@ -8,7 +8,7 @@
 不过实现了NestedScrollingParent，又实现了NestedScrollingChild,窃以为没多大必要实现NestedScrollingChild，所以最后还是自己写一个精简版的算了....
 
 ## Display
-<img src="static/pure.gif"  width="400" height="630"/><img src="static/ll.gif"   width="400" height="630"/>
+<img src="static/pure.gif"  width="400" height="630"/> <img src="static/ll.gif"   width="400" height="630"/>
 <img src="static/ele.gif"  width="400" height="630"/>
 
 
