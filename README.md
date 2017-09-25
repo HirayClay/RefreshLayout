@@ -1,5 +1,5 @@
 ## RefreshLayout
-A easy refresh widget on the basis of nestedsroling
+A easy refresh widget on the basis of nestedscroling
 
 ## Why
 就想要个简单的刷新控件，用嵌套滚动这套机制去做最简单.实现起来逻辑很清晰,其实看到很多刷新控件，早一点的时候，为了实现刷新必须手动分发事件，不过后来出来了嵌套滚动，手动分发
